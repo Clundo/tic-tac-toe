@@ -1,0 +1,35 @@
+#board-container {
+    background-color: lightgray;
+    display: grid;
+    grid-template-columns: repeat(3, 5em);
+    grid-template-rows: repeat(3, 5em);
+    justify-content: center;
+}
+
+.board-cell{
+    width: 100%;
+    border: 1px solid black;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#overlay {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: lightgray;
+}
+
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block
+}
