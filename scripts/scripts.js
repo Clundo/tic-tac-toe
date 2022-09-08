@@ -144,8 +144,8 @@ const gameState = (() => {
     }
 
     const reset = () => {
-        gameBoard.reset()
         activePlayer = Math.random() < 0.5 ? humanPlayer : aiPlayer
+        gameBoard.reset()
     }
 
     const isWon = (board, winningCombinations) => {
