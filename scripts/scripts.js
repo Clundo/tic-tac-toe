@@ -19,14 +19,26 @@ const gameBoard = (() => {
         return board.reduce((arr, cell, i) => cell === '' ? [...arr, i] : arr, [])
     }
 
+    const getHumanWinningCombos = () => {
+        return winningCombinations.filter(combo => combo.filter(cell => board[cell] === humanPlayer.symbol).length > 1 && combo.filter(cell => board[cell] === '').length > 0)
+
+    }
+    const getRobotWinningCombos = () => {
+        return winningCombinations.filter(combo => combo.filter(cell => board[cell] === aiPlayer.symbol).length > 1 && combo.filter(cell => board[cell] === '').length > 0)
+
+    }
+
+    const getCellValue = (i) => {
+        return board[i]
+    }
 
     const onWin = (player) => {
         const overlay = document.getElementById('overlay').className = 'visible'
         const winner = document.getElementById('winner').innerText = player.name + ' Won!'
         const robotWon = document.getElementById('robot-won')
         const humanWon = document.getElementById('human-won')
-        if(!player.isHuman) robotWon.innerText = +robotWon.innerText + 1
-        if(player.isHuman) humanWon.innerText = +humanWon.innerText + 1
+        if (!player.isHuman) robotWon.innerText = +robotWon.innerText + 1
+        if (player.isHuman) humanWon.innerText = +humanWon.innerText + 1
         overlay.className = 'visible'
         winner.innerText = player.name + ' Won!'
 
@@ -85,7 +97,7 @@ const gameBoard = (() => {
         drawBoard()
         gameState.checkIfAi()
     }
-    return {init, reset, getFreeCells, winningCombinations}
+    return {getCellValue, init, reset, getFreeCells, winningCombinations, getHumanWinningCombos, getRobotWinningCombos}
 })()
 
 
@@ -96,7 +108,14 @@ const Player = (name, symbol, isHuman) => {
 
 const ai = (() => {
     const makeMove = () => setTimeout(() => {
-        const free = gameBoard.getFreeCells()
+        const robotCombos = gameBoard.getRobotWinningCombos()
+        const humanCombos = gameBoard.getHumanWinningCombos()
+
+        console.log(robotCombos, humanCombos)
+        const winGame = robotCombos.map(combo => combo.filter(cell => gameBoard.getCellValue(cell) === '')[0])
+        const sabotage = humanCombos.map(combo => combo.filter(cell => gameBoard.getCellValue(cell) === '')[0])
+        console.log(winGame, sabotage)
+        const free = winGame.length ? winGame : sabotage.length ? sabotage : gameBoard.getFreeCells()
         const cellNum = free[Math.floor(Math.random() * free.length)]
         const cell = document.getElementById(`button-${cellNum}`)
         cell && cell.click()
