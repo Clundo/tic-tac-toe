@@ -1,2 +1,5 @@
-# tic-tac-toe
-Tic Tac Toe game based on the Odin Project
+Tic Tac Toe game for the Odin Project: https://www.theodinproject.com/lessons/node-path-javascript-tic-tac-toe
+
+Simple AI added, but operating completely random
+
+Deployed at:
