@@ -2,4 +2,4 @@ Tic Tac Toe game for the Odin Project: https://www.theodinproject.com/lessons/no
 
 Simple AI added, but operating completely random
 
-Deployed at:
+Deployed at: https://clundo.github.io/tic-tac-toe/
