@@ -58,6 +58,7 @@ const gameBoard = (() => {
 
     const clickEvent = (i) => {
         const player = gameState.getPlayer()
+
         if (board[i] === '' && !gameEnded()) {
             selectCell(i, player)
             if (gameState.isWon(board, winningCombinations)) {
@@ -93,9 +94,10 @@ const gameBoard = (() => {
     }
 
     const init = () => {
+
         drawActive()
         drawBoard()
-        gameState.checkIfAi()
+        !gameEnded() && gameState.checkIfAi()
     }
     return {getCellValue, init, reset, getFreeCells, winningCombinations, getHumanWinningCombos, getRobotWinningCombos}
 })()
@@ -142,8 +144,8 @@ const gameState = (() => {
     }
 
     const reset = () => {
-        activePlayer = Math.random() < 0.5 ? humanPlayer : aiPlayer
         gameBoard.reset()
+        activePlayer = Math.random() < 0.5 ? humanPlayer : aiPlayer
     }
 
     const isWon = (board, winningCombinations) => {
