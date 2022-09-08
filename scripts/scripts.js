@@ -111,7 +111,6 @@ const ai = (() => {
         const robotCombos = gameBoard.getRobotWinningCombos()
         const humanCombos = gameBoard.getHumanWinningCombos()
 
-        console.log(robotCombos, humanCombos)
         const winGame = robotCombos.map(combo => combo.filter(cell => gameBoard.getCellValue(cell) === '')[0])
         const sabotage = humanCombos.map(combo => combo.filter(cell => gameBoard.getCellValue(cell) === '')[0])
         console.log(winGame, sabotage)
