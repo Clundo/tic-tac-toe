@@ -23,6 +23,9 @@ const gameBoard = (() => {
         return winningCombinations.filter(combo => combo.filter(cell => board[cell] === humanPlayer.symbol).length > 1 && combo.filter(cell => board[cell] === '').length > 0)
 
     }
+    const getRobotActiveCombos = () => {
+        return winningCombinations.filter(combo => combo.filter(cell => board[cell] === aiPlayer.symbol).length === 1 && combo.filter(cell => board[cell] === '').length === 2)
+    }
     const getRobotWinningCombos = () => {
         return winningCombinations.filter(combo => combo.filter(cell => board[cell] === aiPlayer.symbol).length > 1 && combo.filter(cell => board[cell] === '').length > 0)
 
@@ -99,7 +102,7 @@ const gameBoard = (() => {
         drawBoard()
         !gameEnded() && gameState.checkIfAi()
     }
-    return {getCellValue, init, reset, getFreeCells, winningCombinations, getHumanWinningCombos, getRobotWinningCombos}
+    return {getRobotActiveCombos ,getCellValue, init, reset, getFreeCells, winningCombinations, getHumanWinningCombos, getRobotWinningCombos}
 })()
 
 
@@ -111,12 +114,14 @@ const Player = (name, symbol, isHuman) => {
 const ai = (() => {
     const makeMove = () => setTimeout(() => {
         const robotCombos = gameBoard.getRobotWinningCombos()
+        const activeCombos = gameBoard.getRobotActiveCombos()
         const humanCombos = gameBoard.getHumanWinningCombos()
+
 
         const winGame = robotCombos.map(combo => combo.filter(cell => gameBoard.getCellValue(cell) === '')[0])
         const sabotage = humanCombos.map(combo => combo.filter(cell => gameBoard.getCellValue(cell) === '')[0])
-        console.log(winGame, sabotage)
-        const free = winGame.length ? winGame : sabotage.length ? sabotage : gameBoard.getFreeCells()
+        const active = activeCombos.map(combo => combo.filter(cell => gameBoard.getCellValue(cell) === '')[0])
+        const free = winGame.length ? winGame : sabotage.length ? sabotage : active.length ? active : gameBoard.getFreeCells()
         const cellNum = free[Math.floor(Math.random() * free.length)]
         const cell = document.getElementById(`button-${cellNum}`)
         cell && cell.click()
