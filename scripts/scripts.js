@@ -1,115 +1,156 @@
-const gameboard = (() => {
+const gameBoard = (() => {
+    const winningCombinations = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
     let board = new Array(9).fill('')
 
-    const markCell = (num, player) => {
-        if(board[num] === '') {
-            board[num] = player.symbol
-            drawBoard()
-        }
+    const selectCell = (i, player) => {
+        board[i] = player.symbol
     }
 
+    const drawCell = (i, val, onclick) => {
+        const c = document.createElement('button')
+        c.className = 'board-cell'
+        c.innerText = val
+        c.onclick = () => onclick(i)
+        c.id = `button-${i}`
+        return c
+    }
+
+    const getFreeCells = () => {
+        return board.reduce((arr, cell, i) => cell === '' ? [...arr, i] : arr, [])
+    }
+
+
+    const onWin = (player) => {
+        const overlay = document.getElementById('overlay').className = 'visible'
+        const winner = document.getElementById('winner').innerText = player.name + ' Won!'
+        const robotWon = document.getElementById('robot-won')
+        const humanWon = document.getElementById('human-won')
+        if(!player.isHuman) robotWon.innerText = +robotWon.innerText + 1
+        if(player.isHuman) humanWon.innerText = +humanWon.innerText + 1
+        overlay.className = 'visible'
+        winner.innerText = player.name + ' Won!'
+
+    }
+
+
+    const onTie = () => {
+        const overlay = document.getElementById('overlay')
+        const winner = document.getElementById('winner')
+        overlay.className = 'visible'
+        winner.innerText = 'There\'s a tie. Nobody won'
+    }
+
+    const gameEnded = () => {
+        return gameState.isWon(board, winningCombinations) || gameState.isTied()
+    }
+
+    const clickEvent = (i) => {
+        const player = gameState.getPlayer()
+        if (board[i] === '' && !gameEnded()) {
+            selectCell(i, player)
+            if (gameState.isWon(board, winningCombinations)) {
+                onWin(player)
+            } else if (gameState.isTied()) {
+                onTie()
+            } else {
+                gameState.togglePlayer()
+            }
+        }
+        init()
+    }
+
+    const drawActive = () => {
+        document.getElementById('active-player').innerText = gameState.getPlayer().name
+    }
     const drawBoard = () => {
         const parent = document.getElementById('board-container')
-        while(parent.hasChildNodes()) {
+        while (parent.hasChildNodes()) {
             parent.firstChild.remove()
         }
         board.forEach((cell, i) => {
-            const c = document.createElement('div')
-            c.className = 'board-cell'
-            c.innerText = cell
-            c.onclick = () => {
-                markCell(i, gamestate.getActivePlayer())
-                const won = gamestate.gameIsWon(board)
-                if(won) {
-                    const overlay = document.getElementById('overlay')
-                    const winner = document.getElementById('winner')
-                    overlay.className = 'visible'
-                    winner.innerText = gamestate.getActivePlayer().symbol
-                } else {
-                    if(!gamestate.getRemainingTiles(board)) {
-                        const overlay = document.getElementById('overlay')
-                        const winner = document.getElementById('winner')
-                        overlay.className = 'visible'
-                        winner.innerText = 'Tie! Nobody'
-                    }
-                }
-                gamestate.toggleActive()
-            }
+            const c = drawCell(i, cell, clickEvent)
             parent.appendChild(c)
         })
     }
 
-    const clearBoard = () => {
+    const reset = () => {
         board = new Array(9).fill('')
         const overlay = document.getElementById('overlay')
         overlay.className = 'hidden'
-        drawBoard()
+        init()
     }
 
-    return {markCell, drawBoard, clearBoard}
+    const init = () => {
+        drawActive()
+        drawBoard()
+        gameState.checkIfAi()
+    }
+    return {init, reset, getFreeCells, winningCombinations}
 })()
 
-const Player = (symbol) => {
-    let selected = []
 
-    const reset = () => {
-        selected = []
-    }
+const Player = (name, symbol, isHuman) => {
 
-    const select = (num) => {
-        selected.push(num)
-    }
-
-    return {symbol, reset, select}
+    return {name, isHuman, symbol}
 }
 
-const x = Player('x')
+const ai = (() => {
+    const makeMove = () => setTimeout(() => {
+        const free = gameBoard.getFreeCells()
+        const cellNum = free[Math.floor(Math.random() * free.length)]
+        const cell = document.getElementById(`button-${cellNum}`)
+        cell && cell.click()
+    }, 300)
+    return {makeMove}
+})()
 
-const o = Player('o')
+const humanPlayer = Player('Human', '🦸‍♂️', true)
+
+const aiPlayer = Player('Robot', '🤖', false)
 
 
-const gamestate = (() => {
-    let activePlayer = Math.random() < 0.5 ? x : o
+const gameState = (() => {
+    let activePlayer = Math.random() < 0.5 ? humanPlayer : aiPlayer
 
-    const toggleActive = () => {
-        activePlayer = activePlayer === x ? o : x
+    const checkIfAi = () => {
+        if (!activePlayer.isHuman) {
+            ai.makeMove()
+        }
+    }
+    const getPlayer = () => activePlayer
+
+    const togglePlayer = () => {
+        activePlayer = activePlayer === humanPlayer ? aiPlayer : humanPlayer
     }
 
-    const getActivePlayer = () => {
-        return activePlayer
+    const reset = () => {
+        activePlayer = Math.random() < 0.5 ? humanPlayer : aiPlayer
+        gameBoard.reset()
     }
 
-    const getRemainingTiles = (board) => {
-        return board.filter(cell => cell === '').length
-    }
-
-    const gameIsWon = (board) => {
-        const winningCombinations = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]]
+    const isWon = (board, winningCombinations) => {
         let i = 0
-        while(i < winningCombinations.length) {
+        while (i < winningCombinations.length) {
             let equal = true
             let j = 0
-            while(j < winningCombinations[i].length && equal){
-                if(board[winningCombinations[i][j]] !== activePlayer.symbol) equal = false
+            while (j < winningCombinations[i].length && equal) {
+                if (board[winningCombinations[i][j]] !== activePlayer.symbol) equal = false
                 j++
             }
-            if(equal) return true
+            if (equal) return true
             i++
         }
         return false
     }
 
-    const reset = () => {
-        activePlayer = Math.random() < 0.5 ? x : o
-        gameboard.clearBoard()
+    const isTied = () => {
+        return !gameBoard.getFreeCells().length
     }
 
-    return {getActivePlayer, toggleActive, gameIsWon, reset, getRemainingTiles}
+    return {getPlayer, togglePlayer, isTied, isWon, reset, checkIfAi}
 })()
 
 
-
-
-gameboard.drawBoard()
+gameBoard.init()
 
 

@@ -14,11 +14,16 @@
           rel="stylesheet">
 </head>
 <body>
+<h1>Current Turn: <span id="active-player"></span></h1>
 <div id="board-container"></div>
-<div id="overlay" class="hidden">
-    <h1><span id="winner"></span> Won!</h1>
-    <button onclick={gamestate.reset()}>Reset</button>
+<div class="hidden" id="overlay">
+    <div id="finish-container">
+        <h1><span id="winner"></span></h1>
+        <button onclick={gameState.reset()}>Reset</button>
+    </div>
 </div>
+<h3>Score</h3>
+    <div>Human: <span id="human-won">0</span> / <span id="robot-won">0</span> : Robot</div>
 </body>
 <script src="scripts/scripts.js"></script>
 </html>
